@@ -14,25 +14,28 @@ function nyhsdora_drush_command() {
       'aliases' => array('nyhs_migrate_all'),
       'description' => 'Migrate the William Alexander Papers.',
       'options' => array(
-        'map_directory' => array(
-          'description' => 'The main MARC directory which contains the maps and broadside data.',
+        'map' => array(
+          'description' => 'The zip file or directory which contains the maps mods data. If using directory set --type to directory.',
           'required' => TRUE,
         ),
-        'broadside_directory' => array(
-          'description' => 'The main MARC directory which contains the maps and broadside data.',
+        'broadside' => array(
+          'description' => 'The zip file or directory which contains the broadside mods data. If using directory set --type to directory.',
           'required' => TRUE,
         ),
-        'alexander_directory' => array(
+        'alexander' => array(
           'description' => 'The William Alexander Pages directory.',
           'required' => TRUE,
+        ),
+        'type' => array(
+          'description' => 'Optional: defaults to zip but if the map and broadside paths are directories instead of zip use directory.',
         ),
         'namespace' => array(
           'description' => 'The namespace to use for the ingested objects. Defaults to islandora.',
         ),
       ),
       'examples' => array(
-        'drush -u 1 nyhsdora_migrate_all --map_directory=/pathtomapmods/ --broadside_directory=/pathtobroadsidemods/ --alexander_directory=/pathtoalexanderpapers/' => 'Migrate all content.',
-        'drush -u 1 nyhs_migrate_all --map_directory=/pathtomapmods/ --broadside_directory=/pathtobroadsidemods/ --alexander_directory=/pathtoalexanderpapers/ --namespace=my_namespace' => 'Migrate all content.',
+        'drush -u 1 nyhs_migrate_all --map=/maps.zip --broadside=/broadside.zip --alexander=/pathtoalexanderpapers/' => 'Migrate all content.',
+        'drush -u 1 nyhs_migrate_all --map=/pathtomapmods/ --broadside=/pathtobroadsidemods/ --alexander=/pathtoalexanderpapers/ --type=directory' => 'Migrate all content.',
       ),
       'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_LOGIN,
     ),
@@ -48,7 +51,7 @@ function drush_nyhsdora_migrate_all() {
 
   // Default parameters used for all 3 collection migrations.
   $parameters = array(
-    'type' => 'directory',
+    'type' => drush_get_option('type', 'zip'),
     'namespace' => drush_get_option('namespace', 'islandora'),
     'parent_relationship_pred' => 'isMemberOfCollection',
     'parent_relationship_uri' => FEDORA_RELS_EXT_URI,
@@ -56,19 +59,20 @@ function drush_nyhsdora_migrate_all() {
 
   // Migrate Maps Collection.
   $parameters['parent'] = NYHSDORA_MAPS_PID;
-  $parameters['target'] = drush_get_option('map_directory');
+  $parameters['target'] = drush_get_option('map');
   $map_preprocessor = new NyhsdoraBatchPreprocessor($connection, $parameters);
   islandora_batch_handle_preprocessor($map_preprocessor);
 
   // Migrate Broadside Collection.
   $parameters['parent'] = NYHSDORA_BROADSIDE_PID;
-  $parameters['target'] = drush_get_option('broadside_directory');
+  $parameters['target'] = drush_get_option('broadside');
   $broadside_preprocessor = new NyhsdoraBatchPreprocessor($connection, $parameters);
   islandora_batch_handle_preprocessor($broadside_preprocessor);
 
   // Migrate William Alexander Pages.
+  $parameters['type'] = 'directory';
   $parameters['parent'] = NYHSDORA_AMERICAN_EXPERIENCE_PID;
-  $parameters['target'] = drush_get_option('alexander_directory');
+  $parameters['target'] = drush_get_option('alexander');
   $alexander_papers_preprocessor = new NyhsdoraAlexanderBatchPreprocessor($connection, $parameters);
   islandora_batch_handle_preprocessor($alexander_papers_preprocessor);
 }

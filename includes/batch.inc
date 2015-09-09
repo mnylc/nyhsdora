@@ -99,7 +99,7 @@ class NyhsdoraBatchObject extends IslandoraScanBatchObject {
       $mods_datastream = $this->constructDatastream('MODS', 'M');
       $mods_datastream->mimetype = 'application/xml';
       $mods_datastream->label = 'MODS Record';
-      $mods_file = $this->preprocessorParameters['target'] . $this->baseName . '.xml';
+      $mods_file = $this->objectInfo['xml']->uri;
       if (!empty($mods_file)) {
         $mods_datastream->setContentFromFile($mods_file);
       }
@@ -142,7 +142,7 @@ class NyhsdoraBatchObject extends IslandoraScanBatchObject {
   public function getChildren(IslandoraTuque $connection) {
     $children = array();
     // Load file for parsing out children.
-    $mods_file = $this->preprocessorParameters['target'] . $this->baseName . '.xml';
+    $mods_file = $this->objectInfo['xml']->uri;
     $mods_doc = new DOMDocument();
     $mods_doc->load($mods_file);
     $mods_xpath = new DOMXPath($mods_doc);
@@ -330,7 +330,7 @@ class NyhsdoraAlexanderBatchObject extends IslandoraScanBatchObject {
       $mods_datastream = $this->constructDatastream('MODS', 'M');
       $mods_datastream->mimetype = 'application/xml';
       $mods_datastream->label = 'MODS Record';
-      $mods_file = $this->preprocessorParameters['target'] . $this->baseName . '.xml';
+      $mods_file = $this->objectInfo['xml']->uri;
       if (!empty($mods_file)) {
         $mods_datastream->setContentFromFile($mods_file);
       }
