@@ -153,7 +153,7 @@ class NyhsdoraBatchObject extends IslandoraScanBatchObject {
       $page = array();
       $page['label'] = $mods_xpath->evaluate('string(mods:titleInfo/mods:title/text())', $element);
       $page['obj_url'] = $mods_xpath->evaluate('string(mods:location/mods:url/text())', $element);
-      $children[] = new NyhsdoraBatchPageObject($connection, $this->id, $sequence_number, $page, $this->preprocessorParameters, $this->baseName);
+      $children[] = new NyhsdoraBatchPageObject($connection, $this->id, $sequence_number, $page, $this->preprocessorParameters);
       $sequence_number = $sequence_number + 1;
     }
 
@@ -169,18 +169,15 @@ class NyhsdoraBatchObject extends IslandoraScanBatchObject {
 class NyhsdoraBatchPageObject extends IslandoraScanBatchObject {
   protected $parentId;
   protected $sequenceNumber;
-  protected $volumeBase;
-  protected $pageBase;
   protected $pageImageUrl;
 
   /**
    * Constructor.
    */
-  public function __construct(IslandoraTuque $connection, $parent_id, $sequence, $object_info, $pp, $volume_base) {
+  public function __construct(IslandoraTuque $connection, $parent_id, $sequence, $object_info, $pp) {
     parent::__construct($connection, $parent_id, $object_info, $pp);
     $this->parentId = $parent_id;
     $this->sequenceNumber = $sequence;
-    $this->volumeBase = $volume_base;
     $this->label = $object_info['label'];
     $this->pageImageUrl = $object_info['obj_url'];
   }
@@ -271,12 +268,16 @@ class NyhsdoraAlexanderBatchPreprocessor extends IslandoraScanBatch {
       $file_object->ext = pathinfo($file_object->filename, PATHINFO_EXTENSION);
       // Scan the tif objects as pages, but keep the xml for creating the book.
       if ($file_object->ext != 'xml') {
-        $pages[$file_object->name][$file_object->ext] = $file_object;
+        // Clean up filename so the pages can be sorted and ingested in order.
+        $name_index = str_replace(array('_oldNG051116m', 'm', 'n'), '', $file_object->name);
+        $pages[$name_index][$file_object->ext] = $file_object;
       }
       else {
         $grouped[$file_object->name][$file_object->ext] = $file_object;
       }
     }
+    // Make sure pages are in order.
+    ksort($pages);
     $this->parameters['pages'] = $pages;
 
     return $grouped;
@@ -388,17 +389,14 @@ class NyhsdoraAlexanderBatchObject extends IslandoraScanBatchObject {
 class NyhsdoraAlexanderBatchPageObjects extends IslandoraScanBatchObject {
   protected $parentId;
   protected $sequenceNumber;
-  protected $volumeBase;
-  protected $pageBase;
   /**
    * Constructor.
    */
-  public function __construct(IslandoraTuque $connection, $parent_id, $sequence, $object_info, $pp, $volume_base) {
+  public function __construct(IslandoraTuque $connection, $parent_id, $sequence, $object_info, $pp) {
     parent::__construct($connection, $parent_id, $object_info, $pp);
     $this->parentId = $parent_id;
     $this->sequenceNumber = $sequence;
-    $this->volumeBase = $volume_base;
-    $this->label = $this->objectInfo['tif']->filename;
+    $this->label = $this->objectInfo['tif']->name;
   }
 
   /**
