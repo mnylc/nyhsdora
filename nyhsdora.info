@@ -1,0 +1,10 @@
+name = Nyhsdora
+description = "Custom Islandora functionality for NYHS and data migration."
+dependencies[] = islandora
+dependencies[] = islandora_basic_collection
+dependencies[] = islandora_book
+dependencies[] = islandora_batch
+package = Islandora
+version = 7.x
+core = 7.x
+files[] = includes/batch.inc
