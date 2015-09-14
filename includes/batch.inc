@@ -91,52 +91,6 @@ class NyhsdoraBatchObject extends IslandoraScanBatchObject {
   }
 
   /**
-   * Function to get the mods.
-   */
-  protected function getMods() {
-    if (!isset($this['MODS'])) {
-      module_load_include('inc', 'rochdora', 'includes/utilities');
-      $mods_datastream = $this->constructDatastream('MODS', 'M');
-      $mods_datastream->mimetype = 'application/xml';
-      $mods_datastream->label = 'MODS Record';
-      $mods_file = $this->objectInfo['xml']->uri;
-      if (!empty($mods_file)) {
-        $mods_datastream->setContentFromFile($mods_file);
-      }
-      else {
-        return FALSE;
-      }
-      $this->ingestDatastream($mods_datastream);
-    }
-    return $this['MODS']->content;
-  }
-
-  /**
-   * Function to get dc.
-   */
-  protected function getDc() {
-    if (!isset($this['DC'])) {
-      $dc_datastream = $this->constructDatastream('DC', 'M');
-      $dc_datastream->mimetype = 'application/xml';
-      $dc_datastream->label = 'DC Record';
-      $mods_content = $this->getMods();
-      if ($mods_content) {
-        $dc_datastream->content = static::runXslTransform(
-          array(
-            'xsl' => $this->modsToDcTransform,
-            'input' => $mods_content,
-          )
-        );
-        $this->ingestDatastream($dc_datastream);
-      }
-      else {
-        return FALSE;
-      }
-    }
-    return $this['DC']->content;
-  }
-
-  /**
    * Get the pages to ingest from the mods.
    */
   public function getChildren(IslandoraTuque $connection) {
@@ -308,52 +262,6 @@ class NyhsdoraAlexanderBatchObject extends IslandoraScanBatchObject {
     }
     $this->getDc();
     return ISLANDORA_BATCH_STATE__DONE;
-  }
-
-  /**
-   * Function to get the mods.
-   */
-  protected function getMods() {
-    if (!isset($this['MODS'])) {
-      module_load_include('inc', 'rochdora', 'includes/utilities');
-      $mods_datastream = $this->constructDatastream('MODS', 'M');
-      $mods_datastream->mimetype = 'application/xml';
-      $mods_datastream->label = 'MODS Record';
-      $mods_file = $this->objectInfo['xml']->uri;
-      if (!empty($mods_file)) {
-        $mods_datastream->setContentFromFile($mods_file);
-      }
-      else {
-        return FALSE;
-      }
-      $this->ingestDatastream($mods_datastream);
-    }
-    return $this['MODS']->content;
-  }
-
-  /**
-   * Function to get dc.
-   */
-  protected function getDc() {
-    if (!isset($this['DC'])) {
-      $dc_datastream = $this->constructDatastream('DC', 'M');
-      $dc_datastream->mimetype = 'application/xml';
-      $dc_datastream->label = 'DC Record';
-      $mods_content = $this->getMods();
-      if ($mods_content) {
-        $dc_datastream->content = static::runXslTransform(
-          array(
-            'xsl' => $this->modsToDcTransform,
-            'input' => $mods_content,
-          )
-        );
-        $this->ingestDatastream($dc_datastream);
-      }
-      else {
-        return FALSE;
-      }
-    }
-    return $this['DC']->content;
   }
 
   /**
