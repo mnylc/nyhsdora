@@ -291,17 +291,6 @@ class NyhsdoraAlexanderBatchPreprocessor extends IslandoraScanBatch {
  */
 class NyhsdoraAlexanderBatchObject extends IslandoraScanBatchObject {
   /**
-   * Add collection and content model relationships.
-   */
-  public function addRelationships() {
-    $collection = $this->preprocessorParameters['parent'];
-    $predicate = $this->preprocessorParameters['parent_relationship_pred'];
-    $uri = $this->preprocessorParameters['parent_relationship_uri'];
-    $this->relationships->add($uri, $predicate, $collection);
-    $this->addContentModelRelationships();
-  }
-
-  /**
    * Add the content model relationship(s).
    */
   protected function addContentModelRelationships() {
