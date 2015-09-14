@@ -157,13 +157,15 @@ class NyhsdoraBatchPageObject extends IslandoraScanBatchObject {
       $obj_datastream->label = $file->filename;
       $obj_datastream->mimetype = $file->filemime;
       if ($file !== FALSE) {
+        file_usage_add($file, 'islandora_batch', 'islandora_batch_object', $this->getBatchId());
         $obj_datastream->setContentFromFile($file->uri);
+        $this->ingestDatastream($obj_datastream);
+        file_usage_delete($file, 'islandora_batch', 'islandora_batch_object', $this->getBatchId());
+        file_delete($file);
       }
       else {
         return FALSE;
       }
-      $this->ingestDatastream($obj_datastream);
-      file_delete($file);
     }
   }
 }
