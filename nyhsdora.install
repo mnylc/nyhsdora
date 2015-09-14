@@ -2,7 +2,7 @@
 
 /**
  * @file
- * nyhsdora.install
+ * This file contains all install related hooks.
  */
 
 /**

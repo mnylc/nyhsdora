@@ -38,17 +38,6 @@ class NyhsdoraBatchPreprocessor extends IslandoraScanBatch {
  */
 class NyhsdoraBatchObject extends IslandoraScanBatchObject {
   /**
-   * Add collection and content model relationships.
-   */
-  public function addRelationships() {
-    $collection = $this->preprocessorParameters['parent'];
-    $predicate = $this->preprocessorParameters['parent_relationship_pred'];
-    $uri = $this->preprocessorParameters['parent_relationship_uri'];
-    $this->relationships->add($uri, $predicate, $collection);
-    $this->addContentModelRelationships();
-  }
-
-  /**
    * Add the content model relationship(s).
    */
   protected function addContentModelRelationships() {
@@ -216,8 +205,6 @@ class NyhsdoraAlexanderBatchPreprocessor extends IslandoraScanBatch {
   protected function groupFiles($files) {
     $grouped = array();
     $pages = array();
-    // TODO: Group according to basename, to and hand-off each group to object
-    // wrappers.
     foreach ($files as $uri => &$file_object) {
       $file_object->ext = pathinfo($file_object->filename, PATHINFO_EXTENSION);
       // Scan the tif objects as pages, but keep the xml for creating the book.
