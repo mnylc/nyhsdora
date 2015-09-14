@@ -153,11 +153,11 @@ class NyhsdoraBatchPageObject extends IslandoraScanBatchObject {
     if (!isset($this['OBJ'])) {
       // Grab the remote image and save it locally for ingest.
       $file = system_retrieve_file($this->pageImageUrl, 'temporary://', TRUE);
-      $obj_datastream = $this->constructDatastream('OBJ', 'M');
-      $obj_datastream->label = $file->filename;
-      $obj_datastream->mimetype = $file->filemime;
       if ($file !== FALSE) {
         file_usage_add($file, 'islandora_batch', 'islandora_batch_object', $this->getBatchId());
+        $obj_datastream = $this->constructDatastream('OBJ', 'M');
+        $obj_datastream->label = $file->filename;
+        $obj_datastream->mimetype = $file->filemime;
         $obj_datastream->setContentFromFile($file->uri);
         $this->ingestDatastream($obj_datastream);
         file_usage_delete($file, 'islandora_batch', 'islandora_batch_object', $this->getBatchId());
