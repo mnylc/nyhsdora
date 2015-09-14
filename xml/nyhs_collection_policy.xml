@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <collection_policy name="" xmlns="http://www.islandora.ca" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.islandora.ca">
     <content_models>
-        <content_model dsid="" name="Islandora Collection Model" namespace="islandora" pid="islandora:collectionCModel"/>
-        <content_model dsid="" name="Islandora Internet Archive Book Content Model" namespace="islandora" pid="islandora:bookCModel"/>
+        <content_model dsid="" name="Collection" namespace="islandora" pid="islandora:collectionCModel"/>
+        <content_model dsid="" name="Book" namespace="islandora" pid="islandora:bookCModel"/>
     </content_models>
     <search_terms/>
     <staging_area/>
