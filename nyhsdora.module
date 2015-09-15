@@ -1,0 +1,66 @@
+<?php
+
+/**
+ * @file
+ * Defines all the hooks this module implements.
+ */
+
+define('NYHSDORA_AMERICAN_EXPERIENCE_PID', 'islandora:american_experience');
+define('NYHSDORA_MAPS_PID', 'islandora:maps');
+define('NYHSDORA_BROADSIDE_PID', 'islandora:broadside');
+
+/**
+ * Implements hook_islandora_required_objects().
+ */
+function nyhsdora_islandora_required_objects(IslandoraTuque $connection) {
+  $module_path = drupal_get_path('module', 'nyhsdora');
+  $islandora_path = drupal_get_path('module', 'islandora');
+  $collections = array(
+    NYHSDORA_AMERICAN_EXPERIENCE_PID => array(
+      'pid' => NYHSDORA_AMERICAN_EXPERIENCE_PID,
+      'title' => 'Witness to the Early American Experience',
+    ),
+    NYHSDORA_MAPS_PID => array(
+      'pid' => NYHSDORA_MAPS_PID,
+      'title' => 'Maps',
+      'parent' => NYHSDORA_AMERICAN_EXPERIENCE_PID,
+    ),
+    NYHSDORA_BROADSIDE_PID => array(
+      'pid' => NYHSDORA_BROADSIDE_PID,
+      'title' => 'Broadside',
+      'parent' => NYHSDORA_AMERICAN_EXPERIENCE_PID,
+    ),
+  );
+  $objects = array();
+  foreach ($collections as $info) {
+    $collection = $connection->repository->constructObject($info['pid']);
+    $collection->owner = 'fedoraAdmin';
+    $collection->label = $info['title'];
+    $parent = isset($info['parent']) ? $info['parent'] : 'islandora:root';
+    $collection->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', $parent);
+    $collection->models = 'islandora:collectionCModel';
+
+    // Collection Policy Datastream.
+    $policy_datastream = $collection->constructDatastream('COLLECTION_POLICY', 'X');
+    $policy_datastream->label = 'Islandora Collection Policy';
+    $policy_datastream->mimetype = 'application/xml';
+    $policy_datastream->setContentFromFile("$module_path/xml/nyhs_collection_policy.xml", FALSE);
+    $collection->ingestDatastream($policy_datastream);
+
+    // TN Datastream.
+    $datastream = $collection->constructDatastream('TN', 'M');
+    $datastream->label = 'Thumbnail';
+    $datastream->mimetype = 'image/png';
+    $datastream->setContentFromFile("$islandora_path/images/folder.png", FALSE);
+    $collection->ingestDatastream($datastream);
+
+    $objects[] = $collection;
+  }
+
+  return array(
+    'nyhsdora' => array(
+      'title' => t('New York Historical Society'),
+      'objects' => $objects,
+    ),
+  );
+}
