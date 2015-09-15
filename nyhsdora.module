@@ -64,3 +64,57 @@ function nyhsdora_islandora_required_objects(IslandoraTuque $connection) {
     ),
   );
 }
+
+
+/**
+ * Implements hook_contentdm_migration_tools_migrate_item_to_mods_transform().
+ */
+function nyhsdora_contentdm_migration_tools_migrate_item_to_mods_transform_alter(&$transform, array $data, &$params) {
+  $path = drupal_realpath(drupal_get_path('module', 'nyhsdora') . '/transforms/cdm-api-export2MODS.xsl');
+  $transform = $path;
+  $current_collection = FALSE;
+  switch ($params['alias']) {
+    case 'p16124coll1':
+      $current_collection = 'AmericanManuscripts';
+      break;
+
+    case 'p16694coll47':
+      $current_collection = 'CivilWarTreasures';
+      break;
+
+    case 'p15052coll5':
+      $current_collection = 'SlaveryManuscripts';
+      break;
+
+    case 'NYHSR01':
+      $current_collection = 'NYHSQuarterly';
+      break;
+
+    case 'p16124coll2':
+      $current_collection = 'PhotosOfNYC';
+      break;
+  }
+  $params['current-collection'] = $current_collection;
+}
+
+/**
+ * Implements hook_contentdm_migration_tools_migrate_item().
+ */
+function nyhsdora_contentdm_migration_tools_migrate_item_alter(AbstractObject &$object, AbstractObject $parent, array $data, $update) {
+  if (isset($object['MODS'])) {
+    $dom = new DOMDocument();
+    $dom->loadXML($object['MODS']->content);
+    $dom_xpath = new DOMXPath($dom);
+    $dom_xpath->registerNamespace('mods', 'http://www.loc.gov/mods/v3');
+    $dom_xpath->registerNamespace('cdm', 'http://oclc.org/cdm');
+    $full_text = $dom_xpath->evaluate('string(/mods:mods/mods:extension/cdm:fulltext/text())');
+    if (!empty($full_text)) {
+      module_load_include('inc', 'islandora', 'includes/utlities');
+      $ds = $object->constructDatastream('FULL_TEXT', 'M');
+      $ds->label = 'FULL_TEXT';
+      $ds->mimetype = 'text/plain';
+      $ds->content = islandora_sanitize_input_for_valid_xml($full_text);
+      $object->ingestDatastream($ds);
+    }
+  }
+}
