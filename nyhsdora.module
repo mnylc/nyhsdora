@@ -65,7 +65,6 @@ function nyhsdora_islandora_required_objects(IslandoraTuque $connection) {
   );
 }
 
-
 /**
  * Implements hook_contentdm_migration_tools_migrate_item_to_mods_transform().
  */
