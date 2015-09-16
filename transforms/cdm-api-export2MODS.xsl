@@ -275,54 +275,50 @@
             <xsl:choose>
                 <!-- CivilWarTreasures has a different mapping of collection title, collection url -->
                 <xsl:when test="$current-collection = 'CivilWarTreasures'">
-                    <xsl:for-each select="relatig[. != ''], series[. != ''], subser[. != '']">
+                    <xsl:for-each select="relatig[. != ''], series[. != '']">
                         <xsl:variable name="relationship-type">
                             <xsl:choose>
-                                <xsl:when test="matches(name(),'(collea|relatig)')"><xsl:text>host</xsl:text></xsl:when>
-                                <!-- yes, both series and subseries use 'series' since that is the only selection in 
-                             the attribute value schema -->
-                                <xsl:when test="name() = 'series'"><xsl:text>series</xsl:text></xsl:when>
-                                <xsl:when test="name() = 'subser'"><xsl:text>series</xsl:text></xsl:when>
-                                <xsl:when test="name() = 'relati'"><xsl:text>references</xsl:text></xsl:when>
+                                <xsl:when test="self::relatig"><xsl:text>host</xsl:text></xsl:when>
+                                <xsl:when test="self::series"><xsl:text>series</xsl:text></xsl:when>
                             </xsl:choose>
                         </xsl:variable>
                         <xsl:variable name="display-label">
                             <xsl:choose>
-                                <xsl:when test="matches(name(),'(collea|relatig)')"><xsl:text>Collection</xsl:text></xsl:when>
-                                <xsl:when test="name() = 'series'"><xsl:text>Series</xsl:text></xsl:when>
-                                <xsl:when test="name() = 'subser'"><xsl:text>Subseries</xsl:text></xsl:when>
-                                <!-- display label for <relati> purposefully omitted, we don't know what it is -->
+                                <xsl:when test="self::relatig"><xsl:text>Collection</xsl:text></xsl:when>
+                                <xsl:when test="self::series"><xsl:text>Series</xsl:text></xsl:when>
                             </xsl:choose>
                         </xsl:variable>
                         <relatedItem type="{$relationship-type}" displayLabel="{$display-label}">
                             <titleInfo><title><xsl:value-of select="normalize-space(.)"/></title></titleInfo>
                             <!-- if this is a collection add the id and, if exists, collection url in -->
-                            <xsl:if test="name() = 'collec'">
+                            <xsl:if test="self::relatig">
                                 <identifier type="local"><xsl:value-of select="preceding-sibling::collec"/></identifier>
                             </xsl:if>
-                            <xsl:if test="collea[. != '']">
-                                    <location><url><xsl:apply-templates select="collea"/></url></location>
+                            <xsl:if test="self::relatig and parent::xml/collea[. != '']">
+                                    <location><url><xsl:apply-templates select="parent::xml/collea"/></url></location>
+                            </xsl:if>
+                            <!-- subseries handled in a nested relatedItem -->
+                            <xsl:if test="self::series and parent::xml/subser[. != '']">
+                                <relatedItem type="series" displayLabel="Subseries">
+                                    <titleInfo><title><xsl:apply-templates select="parent::xml/subser[. != '']"/></title></titleInfo>
+                                </relatedItem>
                             </xsl:if>
                         </relatedItem>
                     </xsl:for-each>              
                 </xsl:when>
                 <xsl:otherwise>
-                    <xsl:for-each select="(collea|relatig)[. != ''], series[. != ''], subser[. != ''], relati[. != '']">
+                    <xsl:for-each select="(collea|relatig)[. != ''], series[. != ''], relati[. != '']">
                         <xsl:variable name="relationship-type">
                             <xsl:choose>
                                 <xsl:when test="matches(name(),'(collea|relatig)')"><xsl:text>host</xsl:text></xsl:when>
-                                <!-- yes, both series and subseries use 'series' since that is the only selection in 
-                             the attribute value schema -->
-                                <xsl:when test="name() = 'series'"><xsl:text>series</xsl:text></xsl:when>
-                                <xsl:when test="name() = 'subser'"><xsl:text>series</xsl:text></xsl:when>
-                                <xsl:when test="name() = 'relati'"><xsl:text>references</xsl:text></xsl:when>
+                                <xsl:when test="self::series"><xsl:text>series</xsl:text></xsl:when>
+                                <xsl:when test="self::relati"><xsl:text>references</xsl:text></xsl:when>
                             </xsl:choose>
                         </xsl:variable>
                         <xsl:variable name="display-label">
                             <xsl:choose>
                                 <xsl:when test="matches(name(),'(collea|relatig)')"><xsl:text>Collection</xsl:text></xsl:when>
-                                <xsl:when test="name() = 'series'"><xsl:text>Series</xsl:text></xsl:when>
-                                <xsl:when test="name() = 'subser'"><xsl:text>Subseries</xsl:text></xsl:when>
+                                <xsl:when test="self::series"><xsl:text>Series</xsl:text></xsl:when>
                                 <!-- display label for <relati> purposefully omitted, we don't know what it is -->
                             </xsl:choose>
                         </xsl:variable>
@@ -332,8 +328,14 @@
                             <xsl:if test="name() = 'collea'">
                                 <identifier type="local"><xsl:value-of select="preceding-sibling::collec"/></identifier>
                             </xsl:if>
-                            <xsl:if test="colleb[. != '']">
-                                    <location><url><xsl:apply-templates select="colleb"/></url></location>
+                            <xsl:if test="self::collea and parent::xml/colleb[. != '']">
+                                    <location><url><xsl:apply-templates select="parent::xml/colleb"/></url></location>
+                            </xsl:if>
+                            <!-- subseries handled in a nested relatedItem -->
+                            <xsl:if test="self::series and parent::xml/subser[. != '']">
+                                <relatedItem type="series" displayLabel="Subseries">
+                                    <titleInfo><title><xsl:apply-templates select="parent::xml/subser[. != '']"/></title></titleInfo>
+                                </relatedItem>
                             </xsl:if>
                         </relatedItem>
                     </xsl:for-each>

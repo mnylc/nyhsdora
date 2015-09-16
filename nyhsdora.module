@@ -71,29 +71,17 @@ function nyhsdora_islandora_required_objects(IslandoraTuque $connection) {
 function nyhsdora_contentdm_migration_tools_migrate_item_to_mods_transform_alter(&$transform, array $data, &$params) {
   $path = drupal_realpath(drupal_get_path('module', 'nyhsdora') . '/transforms/cdm-api-export2MODS.xsl');
   $transform = $path;
-  $current_collection = FALSE;
-  switch ($params['alias']) {
-    case 'p16124coll1':
-      $current_collection = 'AmericanManuscripts';
-      break;
 
-    case 'p16694coll47':
-      $current_collection = 'CivilWarTreasures';
-      break;
-
-    case 'p15052coll5':
-      $current_collection = 'SlaveryManuscripts';
-      break;
-
-    case 'NYHSR01':
-      $current_collection = 'NYHSQuarterly';
-      break;
-
-    case 'p16124coll2':
-      $current_collection = 'PhotosOfNYC';
-      break;
-  }
-  $params['current-collection'] = $current_collection;
+  $alias_map = array(
+    'p16124coll1' => 'AmericanManuscripts',
+    'p16694coll47' => 'CivilWarTreasures',
+    'p15052coll5' => 'SlaveryManuscripts',
+    'NYHSR01' => 'NYHSQuarterly',
+    'p16124coll2' => 'PhotosOfNYC',
+  );
+  $params['current-collection'] = isset($alias_map[$params['alias']]) ?
+    $alias_map[$param['alias']] :
+    FALSE;
 }
 
 /**
