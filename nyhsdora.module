@@ -80,7 +80,7 @@ function nyhsdora_contentdm_migration_tools_migrate_item_to_mods_transform_alter
     'p16124coll2' => 'PhotosOfNYC',
   );
   $params['current-collection'] = isset($alias_map[$params['alias']]) ?
-    $alias_map[$param['alias']] :
+    $alias_map[$params['alias']] :
     FALSE;
 }
 
