@@ -357,7 +357,7 @@
                 </xsl:if>
                 <xsl:if test="$current-collection = 'NYHSQuarterly' and transc[. != '']">
                     <!-- transcr used in this collection to store full text -->
-                    <cdm:fulltext><xsl:apply-templates select="format"/></cdm:fulltext>
+                    <cdm:fulltext><xsl:apply-templates select="transc"/></cdm:fulltext>
                 </xsl:if>
             </extension>
             
