@@ -105,3 +105,59 @@ function nyhsdora_contentdm_migration_tools_migrate_item_alter(AbstractObject &$
     }
   }
 }
+
+/**
+ * Implements hook_islandora_datastream_alter().
+ */
+function nyhsdora_islandora_datastream_alter(AbstractObject $object, AbstractDatastream $datastream, &$context) {
+  if ($datastream->id == 'TN' && ($context['action'] == 'ingest' || $context['action'] == 'modify')) {
+    nyhsdora_update_collection_tn($object, $datastream);
+  }
+}
+
+/**
+ * Updates the collection TN on objects who came from a CDM migration.
+ *
+ * @param AbstractObject $object
+ *   An AbstractObject representing an object within Fedora.
+ * @param AbstractDatastream $datastream
+ *   An AbstractDatastream representing a thumbnail within Fedora.
+ */
+function nyhsdora_update_collection_tn(AbstractObject $object, AbstractDatastream $datastream) {
+  // If the parent isn't a collection object bail out straight away.
+  $parent_rels = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOfCollection');
+  if (!empty($parent_rels)) {
+    $parent_rels = reset($parent_rels);
+    $parent = islandora_object_load($parent_rels['object']['value']);
+    if ($parent) {
+      // See if it's also a CDM object.
+      $cdm_rels = $parent->relationships->get(CONTENTDM_RELS_EXT_URI, 'alias');
+      if (!empty($cdm_rels)) {
+        // Need to determine if the parent has the default Islandora folder TN,
+        // otherwise it has already been updated.
+        if (isset($parent['TN'])) {
+          $tn_size = $parent['TN']->size;
+          $obj_tn_size = strlen($datastream->content);
+          $static_md5sum = 'cb971815171163beb105f8074eae1bde';
+          // Default Islandora folder size is 5137.
+          if ($tn_size == 5137 && md5($parent['TN']->content) == $static_md5sum) {
+            // Ensure that the child TN is actually different too.
+            if (!($obj_tn_size == 5137 && md5($datastream->content) == $static_md5sum)) {
+              $parent['TN']->content = $datastream->content;
+              if ($parent['TN']->mimetype != $datastream->mimetype) {
+                $parent['TN']->mimetype = $datastream->mimetype;
+              }
+            }
+          }
+        }
+        else {
+          $parent_datastream = $parent->constructDatastream('TN', 'M');
+          $parent_datastream->label = 'Thumbnail';
+          $parent_datastream->mimetype = $datastream->mimetype;
+          $parent_datastream->content = $datastream->content;
+          $parent->ingestDatastream($parent_datastream);
+        }
+      }
+    }
+  }
+}
