@@ -8,6 +8,7 @@
 define('NYHSDORA_AMERICAN_EXPERIENCE_PID', 'islandora:american_experience');
 define('NYHSDORA_MAPS_PID', 'islandora:maps');
 define('NYHSDORA_BROADSIDE_PID', 'islandora:broadside');
+define('NYHSDORA_MODS_FORM', 'NYHS MODS Form');
 
 /**
  * Implements hook_islandora_required_objects().
@@ -160,4 +161,38 @@ function nyhsdora_update_collection_tn(AbstractObject $object, AbstractDatastrea
       }
     }
   }
+}
+
+/**
+ * Implements hook_islandora_xml_form_builder_form_associations().
+ */
+function nyhsdora_islandora_xml_form_builder_form_associations() {
+  $base_form = array(
+    'form_name' => NYHSDORA_MODS_FORM,
+    'dsid' => 'MODS',
+    'title_field' => array(
+      'titleInfo',
+      'title',
+    ),
+    'transform' => 'mods_to_dc.xsl',
+    'template' => FALSE,
+  );
+  return array(
+    'nyhs_book' => $base_form + array('content_model' => 'islandora:bookCModel'),
+    'nyhs_large_image' => $base_form + array('content_model' => 'islandora:sp_large_image_cmodel'),
+    'nyhs_basic_image' => $base_form + array('content_model' => 'islandora:sp_basic_image'),
+    'nyhs_pdf' => $base_form + array('content_model' => 'islandora:sp_pdf'),
+  );
+}
+
+/**
+ * Implements hook_islandora_xml_form_builder_forms().
+ */
+function nyhsdora_islandora_xml_form_builder_forms() {
+  $module_path = drupal_get_path('module', 'nyhsdora');
+  return array(
+    NYHSDORA_MODS_FORM => array(
+      'form_file' => "$module_path/xml/nyhs_mods.xml",
+    ),
+  );
 }
