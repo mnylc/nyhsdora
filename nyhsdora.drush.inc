@@ -68,11 +68,4 @@ function drush_nyhsdora_migrate_all() {
   $parameters['target'] = drush_get_option('broadside');
   $broadside_preprocessor = new NyhsdoraBatchPreprocessor($connection, $parameters);
   islandora_batch_handle_preprocessor($broadside_preprocessor);
-
-  // Migrate William Alexander Pages.
-  $parameters['type'] = 'directory';
-  $parameters['parent'] = NYHSDORA_AMERICAN_EXPERIENCE_PID;
-  $parameters['target'] = drush_get_option('alexander');
-  $alexander_papers_preprocessor = new NyhsdoraAlexanderBatchPreprocessor($connection, $parameters);
-  islandora_batch_handle_preprocessor($alexander_papers_preprocessor);
 }
