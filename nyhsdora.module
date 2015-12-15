@@ -196,3 +196,33 @@ function nyhsdora_islandora_xml_form_builder_forms() {
     ),
   );
 }
+
+/**
+ * Implements hook_islandora_CMODEL_PID_derivative().
+ */
+function nyhsdora_islandora_compoundCModel_islandora_derivative() {
+  $module_path = drupal_get_path('module', 'nyhsdora');
+  return array(
+    'nyhsdora_compound_thumbnail' => array(
+      'source_dsid' => NULL,
+      'destination_dsid' => 'TN',
+      'function' => array('nyhsdora_compound_derive_thumbnail_of_parent'),
+      'file' => "$module_path/includes/derivatives.inc",
+    ),
+  );
+}
+
+/**
+ * Implements hook_islandora_derivative().
+ */
+function nyhsdora_islandora_derivative() {
+  $module_path = drupal_get_path('module', 'nyhsdora');
+  return array(
+    'nyhsdora_compound_child_thumbnail' => array(
+      'source_dsid' => 'TN',
+      'destination_dsid' => NULL,
+      'function' => array('nyhsdora_compound_derive_thumbnail_on_parent'),
+      'file' => "$module_path/includes/derivatives.inc",
+    ),
+  );
+}
