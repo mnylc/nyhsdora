@@ -190,10 +190,10 @@ function nyhsdora_update_pdf_quality_update_creation_batch_operation($book_pid, 
     '@page' => $page['pid'],
     '@book' => $book_object->id,
   ));
-  // Delete all existing datastreams which are being derived again.
+  // Delete all existing datastreams which are being derived again. We are
+  // deleting the RELS-INT such that the width/height get re-generated.
   $undeleteable = array(
     'RELS-EXT',
-    'RELS-INT',
     'DC',
   );
   $page_object = islandora_object_load($page['pid']);
