@@ -105,7 +105,6 @@ EOQ;
   foreach ($results as $result) {
     $book_pid = $result['parent']['value'];
     batch_set(nyhsdora_update_pdf_quality_update_create_batch($book_pid, $dryrun));
-    break;
   }
   drush_backend_batch_process();
 }
