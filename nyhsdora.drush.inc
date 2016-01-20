@@ -214,7 +214,7 @@ function nyhsdora_update_pdf_quality_update_creation_batch_operation($book_pid, 
       $sandbox['files'][] = $page_pdf_file;
     }
     else {
-      watchdog('islandora_paged_content_pdf_batch', 'Unable to chop a PDF from the PDF for @pid.', array('@pid' => $page['pid']));
+      watchdog('nyhsdora', 'Unable to chop a PDF from the PDF for @pid.', array('@pid' => $page['pid']));
     }
 
     $tif = islandora_paged_content_extract_tiff_from_pdf($pdf_file->uri, $page['page'], $page['device'], '600');
@@ -224,7 +224,7 @@ function nyhsdora_update_pdf_quality_update_creation_batch_operation($book_pid, 
       $sandbox['files'][] = $tif_file;
     }
     else {
-      watchdog('islandora_paged_content_pdf_batch', 'Unable to extract a TIF from the PDF for @pid.', array('@pid' => $page['pid']));
+      watchdog('nyhsdora', 'Unable to extract a TIF from the PDF for @pid.', array('@pid' => $page['pid']));
     }
     $full_text = islandora_paged_content_extract_text_from_pdf($pdf_file->uri, $page['page']);
     if ($full_text) {
@@ -233,7 +233,7 @@ function nyhsdora_update_pdf_quality_update_creation_batch_operation($book_pid, 
       $sandbox['files'][] = $full_text_file;
     }
     else {
-      watchdog('islandora_paged_content_pdf_batch', 'Unable to extract text from the PDF for @pid.', array('@pid' => $page['pid']));
+      watchdog('nyhsdora', 'Unable to extract text from the PDF for @pid.', array('@pid' => $page['pid']));
     }
 
     // Trigger gearman.
