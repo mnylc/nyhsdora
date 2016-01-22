@@ -94,6 +94,9 @@ SELECT DISTINCT ?parent FROM <#ri> WHERE {
   ?obj <fedora-model:hasModel> <info:fedora/islandora:pageCModel> ;
        <fedora-model:label> ?label ;
        <fedora-rels-ext:isMemberOf> ?parent .
+  ?parent <fedora-view:disseminates> ?parent_ds ;
+          <http://contentdm.org/ontology/relsext#pointer> ?pointer .
+  ?parent_ds <fedora-view:disseminationType> <info:fedora/*/PDF>
   OPTIONAL {
     ?obj <fedora-view:disseminates> ?ds .
     ?ds <fedora-view:disseminationType> <info:fedora/*/CDM_ITEM>
