@@ -90,7 +90,7 @@ function drush_nyhsdora_update_pdf_quality() {
   $dryrun = drush_get_option('dryrun', FALSE);
   $tuque = islandora_get_tuque_connection();
   $query = <<<EOQ
-SSELECT DISTINCT ?parent FROM <#ri> WHERE {
+SELECT DISTINCT ?parent FROM <#ri> WHERE {
   ?obj <fedora-model:hasModel> <info:fedora/islandora:pageCModel> ;
        <fedora-model:label> ?label ;
        <fedora-rels-ext:isMemberOf> ?parent .
