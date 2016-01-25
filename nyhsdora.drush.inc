@@ -174,7 +174,7 @@ function nyhsdora_update_pdf_quality_update_creation_batch_operation($book_pid, 
     foreach ($sandbox['pages'] as &$page) {
       // Sequence numbers start at 1, colorspaces keyed at 0.
       $selected_colorspace = $colorspaces[$page['page'] - 1];
-      if (strcasecmp($selected_colorspace, 'rgb') == 0) {
+      if (strcasecmp($selected_colorspace, 'rgb') == 0 || strcasecmp($selected_colorspace, 'srgb') == 0) {
         $device = 'tiff48nc';
       }
       elseif (strcasecmp($selected_colorspace, 'cmyk') == 0) {
