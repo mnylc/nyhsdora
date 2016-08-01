@@ -52,6 +52,18 @@ function nyhsdora_drush_command() {
       ),
       'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_LOGIN,
     ),
+    'nyhsdora_update_mods' => array(
+      'description' => dt("Updates NYHS' MODS metadata."),
+      'drupal dependencies' => array(
+        'islandora',
+      ),
+      'options' => array(
+        'dryrun' => array(
+          'description' => dt('Whether we are doing a test run or not, defaults to FALSE if not specified.'),
+          'required' => FALSE,
+        ),
+      ),
+    ),
   );
 }
 
@@ -254,4 +266,113 @@ function nyhsdora_update_pdf_quality_update_creation_batch_operation($book_pid, 
   else {
     $context['finished'] = 0;
   }
+}
+
+/**
+ * Command callback to update NYHS' MODS metadata.
+ */
+function drush_nyhsdora_update_mods() {
+  batch_set(nyhsdora_update_mods_metadata_batch(drush_get_option('dryrun', FALSE)));
+  drush_backend_batch_process();
+}
+
+/**
+ * Constructs a batch to update MODS metadata.
+ */
+function nyhsdora_update_mods_metadata_batch($dryrun) {
+  return array(
+    'operations' => array(
+      array(
+        'nyhsdora_update_mods_batch_operation',
+        array($dryrun),
+      ),
+    ),
+    'title' => t('Updating MODS metadata...'),
+    'init_message' => t('Preparing to update MODS metadata.'),
+    'progress_message' => t('Time elapsed: @elapsed <br/>Estimated time remaining @estimate.'),
+    'error_message' => t('An error has occurred.'),
+  );
+}
+
+/**
+ * Batch operation to update MODS metadata.
+ */
+function nyhsdora_update_mods_batch_operation($dryrun, &$context) {
+  $sandbox = &$context['sandbox'];
+  drupal_static_reset('islandora_get_tuque_connection');
+  $tuque = islandora_get_tuque_connection();
+  $query = <<<EOQ
+SELECT ?object ?created FROM <#ri> WHERE {
+  ?disseminationType <fedora-view:disseminationType>  <info:fedora/*/MODS> .
+  ?object <info:fedora/fedora-system:def/view#disseminates> ?disseminationType ;
+          <fedora-model:createdDate> ?created
+  !filter
+}
+ORDER BY ?created
+
+EOQ;
+  if (!isset($sandbox['total'])) {
+    $sandbox['progress'] = 0;
+    $sandbox['total'] = $tuque->repository->ri->countQuery(format_string($query, array(
+      '!filter' => '',
+    )), 'sparql');
+    if ($sandbox['total'] == 0) {
+      $context['finished'] = 1;
+      $context['message'] = t('Nothing to update.');
+      return;
+    }
+    $sandbox['result_stash'] = array();
+  }
+  if (empty($sandbox['result_stash'])) {
+    $limited_query = format_string($query, array(
+      '!filter' => (isset($sandbox['last_date']) ?
+          "FILTER(?created > \"{$sandbox['last_date']}\"^^<xsd:dateTime>)" :
+          ''),
+    )) . <<<EOQ
+LIMIT 1000
+EOQ;
+    drush_log(dt('Querying for 1000 objects.'));
+    $sandbox['result_stash'] = $tuque->repository->ri->sparqlQuery($limited_query);
+    if (empty($sandbox['result_stash'])) {
+      // Ran out of items early?
+      $context['finished'] = 1;
+      $context['message'] = t('Updated @count PID(s) and ran out of items early... Somebody manually updated a document?', array(
+        '@count' => $sandbox['total'],
+      ));
+      return;
+    }
+  }
+  $result = array_shift($sandbox['result_stash']);
+  $updating_pid = $result['object']['value'];
+  $sandbox['last_date'] = $result['created']['value'];
+  $transform_path = drupal_get_path('module', 'nyhsdora') . '/xml/nyhs_update_mods.xsl';
+  $xsl = new DOMDocument();
+  $xsl->load($transform_path);
+  $xslt = new XSLTProcessor();
+  $xslt->importStylesheet($xsl);
+  $object = islandora_object_load($updating_pid);
+  if ($object) {
+    // Run XSL and set content.
+    $dom = new DOMDocument();
+    $dom->loadXML($object['MODS']->content);
+    $result = $xslt->transformToXml($dom);
+    if ($result) {
+      if (!$dryrun) {
+        $object['MODS']->content = $result;
+      }
+      drush_log(dt('Updated MODS for @pid.', array('@pid' => $updating_pid)));
+    }
+    else {
+      drush_log(dt('Failed to transform MODS for @pid.', array('@pid' => $updating_pid)));
+    }
+  }
+  else {
+    drush_log(dt('Unable to load object for @pid.', array('@pid' => $updating_pid)));
+  }
+  $sandbox['progress'] = min($sandbox['total'], $sandbox['progress'] + 1);
+  $context['finished'] = $sandbox['progress'] / $sandbox['total'];
+  $context['message'] = t('Updated @progress of @total.', array(
+    '@progress' => $sandbox['progress'],
+    '@total' => $sandbox['total'],
+  ));
 }
